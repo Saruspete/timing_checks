@@ -1,8 +1,16 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/time.h>
-#include <sched.h>
+
+#ifndef SYS_getcpu
+# ifdef __X86_64__
+#  define SYS_getcpu 309
+# else
+#  define SYS_getcpu 318
+# endif
+#endif
 
 int main(int argc, char* argv[]) {
 
@@ -25,7 +33,7 @@ int main(int argc, char* argv[]) {
 	gettimeofday(&tvStart, NULL);
 
 	unsigned int cpuNum, nodeNum;
-	getcpu(&cpuNum, &nodeNum);
+	syscall(SYS_getcpu,&cpuNum, &nodeNum);
 
 	printf("Start: %ld.%ld\n", tvStart.tv_sec, tvStart.tv_usec);
 	printf("CPU: on cpu %u node %u\n", cpuNum, nodeNum);
@@ -54,7 +62,7 @@ int main(int argc, char* argv[]) {
 	int diff =
 		( tvStop.tv_sec  - tvStart.tv_sec ) * 1000000 +
 		( tvStop.tv_usec - tvStart.tv_usec);
-	getcpu(&cpuNum, &nodeNum);
+	syscall(SYS_getcpu, &cpuNum, &nodeNum);
 
 	printf("End: %ld.%ld\n", tvStop.tv_sec, tvStop.tv_usec);
 	printf("CPU: on %u node %u\n", cpuNum, nodeNum);
